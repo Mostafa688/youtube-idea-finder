@@ -22,7 +22,9 @@ const els = {
 function loadSaved() {
   els.ytKey.value = localStorage.getItem("yif_yt_key") || "";
   els.geminiKey.value = localStorage.getItem("yif_gemini_key") || "";
-  els.geminiModel.value = localStorage.getItem("yif_gemini_model") || "gemini-2.5-flash";
+  const deprecatedModels = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite", "gemini-1.5-flash", "gemini-1.5-pro"];
+  const storedModel = localStorage.getItem("yif_gemini_model");
+  els.geminiModel.value = storedModel && !deprecatedModels.includes(storedModel) ? storedModel : "gemini-3.6-flash";
   els.myChannel.value = localStorage.getItem("yif_my_channel") || "";
   els.competitors.value = localStorage.getItem("yif_competitors") || "";
   els.rememberKeys.checked = localStorage.getItem("yif_remember") !== "0";
@@ -248,7 +250,7 @@ function escapeHtml(str) {
 
 // ---------- gemini ----------
 async function askGemini({ myChannel, topVideos, competitorNames, monthsBack }) {
-  const model = els.geminiModel.value.trim() || "gemini-2.5-flash";
+  const model = els.geminiModel.value.trim() || "gemini-3.6-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(els.geminiKey.value.trim())}`;
 
   const dataForPrompt = topVideos.slice(0, 25).map((v) => ({
@@ -383,6 +385,9 @@ async function runAnalysis() {
     log("خلصنا! 🎉", "ok");
   } catch (e) {
     log(`خطأ: ${e.message}`, "err");
+    if (/Gemini API error/i.test(e.message)) {
+      log('لو الخطأ بيقول إن الموديل مش متاح، افتح "إعداد متقدم" وغيّر اسم الموديل (مثلاً جرب الاسم اللي اقترحته الرسالة نفسها)، وبعدين دوس الزرار تاني.', "err");
+    }
   } finally {
     els.analyzeBtn.disabled = false;
     els.analyzeBtn.textContent = "حلّل الفيديوهات الرائجة واقترح أفكار 🚀";
