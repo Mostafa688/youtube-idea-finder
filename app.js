@@ -22,9 +22,7 @@ const els = {
 function loadSaved() {
   els.ytKey.value = localStorage.getItem("yif_yt_key") || "";
   els.geminiKey.value = localStorage.getItem("yif_gemini_key") || "";
-  const deprecatedModels = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-flash-lite", "gemini-1.5-flash", "gemini-1.5-pro"];
-  const storedModel = localStorage.getItem("yif_gemini_model");
-  els.geminiModel.value = storedModel && !deprecatedModels.includes(storedModel) ? storedModel : "gemini-3.6-flash";
+  localStorage.removeItem("yif_gemini_model"); // avoid ever getting stuck on a model Google has since retired
   els.myChannel.value = localStorage.getItem("yif_my_channel") || "";
   els.competitors.value = localStorage.getItem("yif_competitors") || "";
   els.rememberKeys.checked = localStorage.getItem("yif_remember") !== "0";
@@ -34,7 +32,6 @@ function saveState() {
   if (els.rememberKeys.checked) {
     localStorage.setItem("yif_yt_key", els.ytKey.value.trim());
     localStorage.setItem("yif_gemini_key", els.geminiKey.value.trim());
-    localStorage.setItem("yif_gemini_model", els.geminiModel.value.trim());
     localStorage.setItem("yif_remember", "1");
   } else {
     localStorage.removeItem("yif_yt_key");
