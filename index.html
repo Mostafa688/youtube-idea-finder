@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مولّد أفكار فيديوهات يوتيوب</title>
+<meta name="description" content="أداة مجانية: حط لينكات قنوات منافسينك وهي تحلل الفيديوهات الرائجة آخر فترة وتقترحلك فكرة الفيديو الجاي مع تقييم احتمال نجاحه">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="site-header">
+    <h1>🎯 مولّد أفكار فيديوهات يوتيوب</h1>
+    <p class="sub">حط لينكات قنوات منافسينك، والأداة هتحلل الفيديوهات اللي ضربت عندهم آخر فترة، وتقترحلك أفكار فيديو مناسبة لقناتك مع تقييم احتمال نجاح كل فكرة.</p>
+  </header>
+
+  <section class="card" id="setup-card">
+    <div class="card-head" data-toggle="setup-body">
+      <h2>1) إعداد المفاتيح <span class="hint">(مرة واحدة بس)</span></h2>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="card-body" id="setup-body">
+      <p class="note">
+        المفاتيح دي بتتخزن في متصفحك فقط (localStorage) ومبتتبعتش لأي سيرفر غير جوجل مباشرة من متصفحك.
+        مفتاح <b>YouTube Data API</b> مجاني، ومفتاح <b>Gemini API</b> مجاني برضه من Google AI Studio.
+      </p>
+
+      <div class="field">
+        <label for="yt-key">مفتاح YouTube Data API v3</label>
+        <input type="password" id="yt-key" placeholder="AIzaSy...">
+        <a class="get-key" href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">جيب المفتاح من هنا (Google Cloud Console) ↗</a>
+      </div>
+
+      <div class="field">
+        <label for="gemini-key">مفتاح Gemini API</label>
+        <input type="password" id="gemini-key" placeholder="AIzaSy...">
+        <a class="get-key" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">جيب المفتاح من هنا (Google AI Studio - مجاني) ↗</a>
+      </div>
+
+      <div class="field">
+        <label for="gemini-model">موديل Gemini</label>
+        <input type="text" id="gemini-model" list="gemini-models" value="gemini-2.5-flash">
+        <datalist id="gemini-models">
+          <option value="gemini-2.5-flash">
+          <option value="gemini-2.0-flash">
+          <option value="gemini-2.5-flash-lite">
+        </datalist>
+      </div>
+
+      <label class="checkbox-row">
+        <input type="checkbox" id="remember-keys" checked>
+        تذكر المفاتيح في المتصفح ده
+      </label>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2) بيانات التحليل</h2>
+
+    <div class="field">
+      <label for="my-channel">رابط قناتك <span class="hint">(اختياري، بيساعد في تخصيص الاقتراحات)</span></label>
+      <input type="text" id="my-channel" placeholder="https://www.youtube.com/@channel-name">
+    </div>
+
+    <div class="field">
+      <label for="competitors">روابط قنوات المنافسين <span class="hint">(لينك في كل سطر، من 1 لحد 8 قنوات)</span></label>
+      <textarea id="competitors" rows="6" placeholder="https://www.youtube.com/@channel1
+https://www.youtube.com/@channel2
+https://www.youtube.com/channel/UCxxxxxxxx"></textarea>
+    </div>
+
+    <div class="field inline">
+      <div>
+        <label for="months-back">تحليل آخر</label>
+        <select id="months-back">
+          <option value="1">شهر</option>
+          <option value="2">شهرين</option>
+          <option value="3">3 شهور</option>
+          <option value="4" selected>4 شهور</option>
+          <option value="6">6 شهور</option>
+        </select>
+      </div>
+    </div>
+
+    <button id="analyze-btn" class="primary-btn">حلّل الفيديوهات الرائجة واقترح أفكار 🚀</button>
+  </section>
+
+  <section class="card" id="status-card" hidden>
+    <h2>الحالة</h2>
+    <ul id="status-log" class="status-log"></ul>
+  </section>
+
+  <section class="card" id="results-card" hidden>
+    <h2>💡 الأفكار المقترحة</h2>
+    <p id="analysis-summary" class="analysis-summary"></p>
+    <div id="ideas-grid" class="ideas-grid"></div>
+  </section>
+
+  <section class="card" id="videos-card" hidden>
+    <h2>📈 أكثر الفيديوهات ضربًا نسبةً لحجم كل قناة</h2>
+    <p class="note">مرتبة حسب مدى تفوّق أداء الفيديو عن متوسط أداء نفس القناة في نفس الفترة — ده بيكشف الفيديوهات اللي "ضربت" فعلًا مش بس القنوات الكبيرة.</p>
+    <div id="videos-table"></div>
+  </section>
+
+  <footer class="site-footer">
+    أداة مجانية ومفتوحة المصدر — مفاتيحك وبياناتك ما بتتخزنش على أي سيرفر، كل حاجة بتحصل جوه متصفحك.
+  </footer>
+
+</div>
+<script src="app.js"></script>
+</body>
+</html>
