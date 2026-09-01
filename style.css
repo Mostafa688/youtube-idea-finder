@@ -305,4 +305,43 @@ body {
   margin-top: 30px;
 }
 
+.how-to {
+  background: var(--panel-2);
+  border-color: var(--accent-2);
+}
+
+.steps {
+  margin: 0;
+  padding-inline-start: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 0.92rem;
+}
+
+.howto-details {
+  margin-top: 8px;
+}
+
+.howto-details summary {
+  cursor: pointer;
+  color: var(--accent-2);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.howto-details ol {
+  margin: 10px 0 0;
+  padding-inline-start: 20px;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.howto-details a {
+  color: var(--accent-2);
+}
+
 [hidden] { display: none !important; }

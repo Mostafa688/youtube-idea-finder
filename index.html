@@ -15,6 +15,15 @@
     <p class="sub">حط لينكات قنوات منافسينك، والأداة هتحلل الفيديوهات اللي ضربت عندهم آخر فترة، وتقترحلك أفكار فيديو مناسبة لقناتك مع تقييم احتمال نجاح كل فكرة.</p>
   </header>
 
+  <section class="card how-to">
+    <h2>👋 إزاي تستخدم الأداة دي؟ (3 خطوات بسيطة)</h2>
+    <ol class="steps">
+      <li><b>هات مفتاحين مجانيين من جوجل</b> — هيبقوا زي كلمة سر بتسمح للأداة تجيب البيانات لحسابك انت بس. اضغط على "إزاي أجيبه؟" تحت كل خانة وهيوريك بالصور خطوة بخطوة، بياخدوا 5 دقايق المرتين.</li>
+      <li><b>حط اللينكات</b> — لينك قناتك (اختياري) ولينكات قنوات منافسينك (انسخهم من شريط العنوان وإنت داخل قناتهم على يوتيوب).</li>
+      <li><b>دوس الزرار الكبير</b> واستنى شوية، هيطلعلك تحت أفكار فيديو جاهزة مع تقييم لكل فكرة.</li>
+    </ol>
+  </section>
+
   <section class="card" id="setup-card">
     <div class="card-head" data-toggle="setup-body">
       <h2>1) إعداد المفاتيح <span class="hint">(مرة واحدة بس)</span></h2>
@@ -22,49 +31,67 @@
     </div>
     <div class="card-body" id="setup-body">
       <p class="note">
-        المفاتيح دي بتتخزن في متصفحك فقط (localStorage) ومبتتبعتش لأي سيرفر غير جوجل مباشرة من متصفحك.
-        مفتاح <b>YouTube Data API</b> مجاني، ومفتاح <b>Gemini API</b> مجاني برضه من Google AI Studio.
+        المفاتيح دي بتتخزن في متصفحك فقط ومبتتبعتش لأي حد غير جوجل مباشرة. متقلقش، الخطوات سهلة وهنوريك بالتفصيل تحت.
       </p>
 
       <div class="field">
-        <label for="yt-key">مفتاح YouTube Data API v3</label>
-        <input type="password" id="yt-key" placeholder="AIzaSy...">
-        <a class="get-key" href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">جيب المفتاح من هنا (Google Cloud Console) ↗</a>
+        <label for="yt-key">1. مفتاح YouTube</label>
+        <input type="password" id="yt-key" placeholder="الصق المفتاح هنا">
+        <details class="howto-details">
+          <summary>إزاي أجيبه؟ (خطوة بخطوة)</summary>
+          <ol>
+            <li>افتح <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener">الصفحة دي</a> وسجل دخول بحساب Gmail بتاعك.</li>
+            <li>اكتب أي اسم للمشروع (مثلاً "my-tool") ودوس <b>Create</b>، واستنى شوية.</li>
+            <li>افتح <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank" rel="noopener">اللينك ده</a> وتأكد المشروع اللي عملته مختار فوق، ودوس زرار <b>Enable</b>.</li>
+            <li>افتح <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">اللينك ده</a> ودوس <b>+ Create Credentials</b> ثم <b>API key</b>.</li>
+            <li>هيطلعلك المفتاح في نافذة — دوس عليه لصقه هنا (Copy) والصقه في الخانة فوق.</li>
+          </ol>
+        </details>
       </div>
 
       <div class="field">
-        <label for="gemini-key">مفتاح Gemini API</label>
-        <input type="password" id="gemini-key" placeholder="AIzaSy...">
-        <a class="get-key" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">جيب المفتاح من هنا (Google AI Studio - مجاني) ↗</a>
+        <label for="gemini-key">2. مفتاح Gemini</label>
+        <input type="password" id="gemini-key" placeholder="الصق المفتاح هنا">
+        <details class="howto-details">
+          <summary>إزاي أجيبه؟ (خطوة بخطوة)</summary>
+          <ol>
+            <li>افتح <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">الصفحة دي</a> وسجل دخول بنفس حساب Gmail.</li>
+            <li>دوس زرار <b>Create API key</b>.</li>
+            <li>اختار "Create API key in new project" لو سألك.</li>
+            <li>انسخ المفتاح اللي هيظهر والصقه في الخانة فوق.</li>
+          </ol>
+        </details>
       </div>
 
-      <div class="field">
-        <label for="gemini-model">موديل Gemini</label>
+      <details class="field howto-details">
+        <summary>إعداد متقدم (اختياري، سيبه زي ما هو لو مش فاهم)</summary>
+        <label for="gemini-model" style="margin-top:10px">موديل Gemini</label>
         <input type="text" id="gemini-model" list="gemini-models" value="gemini-2.5-flash">
         <datalist id="gemini-models">
           <option value="gemini-2.5-flash">
           <option value="gemini-2.0-flash">
           <option value="gemini-2.5-flash-lite">
         </datalist>
-      </div>
+      </details>
 
       <label class="checkbox-row">
         <input type="checkbox" id="remember-keys" checked>
-        تذكر المفاتيح في المتصفح ده
+        احفظ المفاتيح في المتصفح ده عشان متكتبهاش تاني كل مرة
       </label>
     </div>
   </section>
 
   <section class="card">
-    <h2>2) بيانات التحليل</h2>
+    <h2>2) حط قناتك وقنوات منافسينك</h2>
 
     <div class="field">
-      <label for="my-channel">رابط قناتك <span class="hint">(اختياري، بيساعد في تخصيص الاقتراحات)</span></label>
-      <input type="text" id="my-channel" placeholder="https://www.youtube.com/@channel-name">
+      <label for="my-channel">لينك قناتك <span class="hint">(اختياري — بيساعد الأداة تخصصلك الاقتراحات)</span></label>
+      <input type="text" id="my-channel" placeholder="مثال: https://www.youtube.com/@channel-name">
     </div>
 
     <div class="field">
-      <label for="competitors">روابط قنوات المنافسين <span class="hint">(لينك في كل سطر، من 1 لحد 8 قنوات)</span></label>
+      <label for="competitors">لينكات قنوات المنافسين <span class="hint">(لينك في كل سطر، من قناة واحدة لحد 8)</span></label>
+      <p class="note" style="margin-bottom:10px">افتح قناة المنافس على يوتيوب، انسخ اللينك من فوق من شريط العنوان، والصقه هنا. كرر نفس الخطوة لكل قناة في سطر جديد.</p>
       <textarea id="competitors" rows="6" placeholder="https://www.youtube.com/@channel1
 https://www.youtube.com/@channel2
 https://www.youtube.com/channel/UCxxxxxxxx"></textarea>
@@ -72,7 +99,7 @@ https://www.youtube.com/channel/UCxxxxxxxx"></textarea>
 
     <div class="field inline">
       <div>
-        <label for="months-back">تحليل آخر</label>
+        <label for="months-back">حلل فيديوهات آخر</label>
         <select id="months-back">
           <option value="1">شهر</option>
           <option value="2">شهرين</option>
@@ -83,7 +110,7 @@ https://www.youtube.com/channel/UCxxxxxxxx"></textarea>
       </div>
     </div>
 
-    <button id="analyze-btn" class="primary-btn">حلّل الفيديوهات الرائجة واقترح أفكار 🚀</button>
+    <button id="analyze-btn" class="primary-btn">3) حلّل الفيديوهات الرائجة واقترح أفكار 🚀</button>
   </section>
 
   <section class="card" id="status-card" hidden>
