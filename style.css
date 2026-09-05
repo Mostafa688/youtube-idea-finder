@@ -103,6 +103,14 @@ body {
 
 .field { margin-bottom: 16px; }
 
+.field.inline {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.field.inline > div { flex: 1; min-width: 180px; }
+
 .field label {
   display: block;
   margin-bottom: 6px;

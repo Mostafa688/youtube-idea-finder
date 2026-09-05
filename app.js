@@ -8,6 +8,7 @@ const els = {
   myChannel: document.getElementById("my-channel"),
   competitors: document.getElementById("competitors"),
   monthsBack: document.getElementById("months-back"),
+  videoFormat: document.getElementById("video-format"),
   analyzeBtn: document.getElementById("analyze-btn"),
   statusCard: document.getElementById("status-card"),
   statusLog: document.getElementById("status-log"),
@@ -25,6 +26,7 @@ function loadSaved() {
   localStorage.removeItem("yif_gemini_model"); // avoid ever getting stuck on a model Google has since retired
   els.myChannel.value = localStorage.getItem("yif_my_channel") || "";
   els.competitors.value = localStorage.getItem("yif_competitors") || "";
+  els.videoFormat.value = localStorage.getItem("yif_video_format") || "all";
   els.rememberKeys.checked = localStorage.getItem("yif_remember") !== "0";
 }
 
@@ -40,6 +42,7 @@ function saveState() {
   }
   localStorage.setItem("yif_my_channel", els.myChannel.value.trim());
   localStorage.setItem("yif_competitors", els.competitors.value.trim());
+  localStorage.setItem("yif_video_format", els.videoFormat.value);
 }
 
 loadSaved();
@@ -62,6 +65,13 @@ function log(msg, kind) {
   if (kind) li.className = kind;
   els.statusLog.appendChild(li);
   li.scrollIntoView({ block: "nearest" });
+}
+
+function parseDurationSeconds(iso) {
+  const m = iso.match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/);
+  if (!m) return 0;
+  const [, h, mnt, s] = m;
+  return (parseInt(h || "0", 10) * 3600) + (parseInt(mnt || "0", 10) * 60) + parseInt(s || "0", 10);
 }
 
 // ---------- channel input parsing ----------
@@ -155,8 +165,8 @@ async function fetchRecentVideos(channel, cutoffDate) {
     const chunk = videoIds.slice(i, i + 50);
     const data = await ytFetch("videos", { part: "snippet,statistics,contentDetails", id: chunk.join(",") });
     for (const v of data.items || []) {
-      const duration = v.contentDetails?.duration || "";
-      const isShort = /PT[0-9]+S$/.test(duration) || /PT[1-5]?[0-9]S$/.test(duration);
+      const durationSeconds = parseDurationSeconds(v.contentDetails?.duration || "");
+      const isShort = durationSeconds > 0 && durationSeconds <= 183;
       videos.push({
         id: v.id,
         title: v.snippet.title,
@@ -246,7 +256,7 @@ function escapeHtml(str) {
 }
 
 // ---------- gemini ----------
-async function askGemini({ myChannel, topVideos, competitorNames, monthsBack }) {
+async function askGemini({ myChannel, topVideos, competitorNames, monthsBack, videoFormat }) {
   const model = els.geminiModel.value.trim() || "gemini-3.6-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(els.geminiKey.value.trim())}`;
 
@@ -259,10 +269,16 @@ async function askGemini({ myChannel, topVideos, competitorNames, monthsBack }) 
     is_short: v.isShort,
   }));
 
+  const formatInstruction =
+    videoFormat === "long" ? "المستخدم عايز أفكار لفيديوهات طويلة (long-form) بس. البيانات تحت كلها من فيديوهات طويلة، ولازم كل الأفكار المقترحة تكون لفيديوهات طويلة برضه (حدد في format كلمة \"فيديو طويل\")." :
+    videoFormat === "short" ? "المستخدم عايز أفكار لـ Shorts بس (فيديوهات قصيرة تحت 3 دقايق عمودية). البيانات تحت كلها من Shorts، ولازم كل الأفكار المقترحة تكون لـ Shorts برضه (حدد في format كلمة \"Shorts\")." :
+    "المستخدم مش محدد نوع معين، فبيانات تحت فيها فيديوهات طويلة و Shorts مع بعض. لكل فكرة، حدد في format هل هي مناسبة كـ \"فيديو طويل\" أو \"Shorts\" حسب طبيعة الفكرة نفسها.";
+
   const prompt = `انت خبير استراتيجية محتوى يوتيوب. تحت هتلاقي بيانات فعلية عن أكتر الفيديوهات اللي "ضربت" (outlier_score = نسبة مشاهدات الفيديو لمتوسط مشاهدات نفس القناة في آخر ${monthsBack} شهور، يعني رقم أعلى من 1 معناه الفيديو ضرب أكتر من المعتاد لنفس القناة).
 
 قناة المستخدم: ${myChannel || "مش متاحة - اقترح أفكار عامة تناسب نفس مجال المنافسين"}
 أسماء قنوات المنافسين اللي اتحللت: ${competitorNames.join("، ")}
+${formatInstruction}
 
 بيانات الفيديوهات الرائجة (الأعلى outlier_score الأول):
 ${JSON.stringify(dataForPrompt, null, 2)}
@@ -386,12 +402,23 @@ async function runAnalysis() {
       return;
     }
 
+    const videoFormat = els.videoFormat.value;
+    const filteredVideos =
+      videoFormat === "long" ? allVideos.filter((v) => !v.isShort) :
+      videoFormat === "short" ? allVideos.filter((v) => v.isShort) :
+      allVideos;
+
+    if (!filteredVideos.length) {
+      log("مفيش فيديوهات من النوع ده (طويلة/Shorts) في الفترة والقنوات دي، جرب تغيّر الفلتر أو تزود المدة", "err");
+      return;
+    }
+
     log("بحسب أداء كل فيديو نسبة لمتوسط قناته...");
-    const ranked = scoreVideos(allVideos);
+    const ranked = scoreVideos(filteredVideos);
     renderVideosTable(ranked);
 
     log("بستشير Gemini AI عشان يقترح أفكار...");
-    const result = await askGemini({ myChannel: myChannelName, topVideos: ranked, competitorNames, monthsBack });
+    const result = await askGemini({ myChannel: myChannelName, topVideos: ranked, competitorNames, monthsBack, videoFormat });
     renderIdeas(result);
     log("خلصنا! 🎉", "ok");
   } catch (e) {
