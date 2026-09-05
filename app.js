@@ -305,18 +305,32 @@ ${JSON.stringify(dataForPrompt, null, 2)}
     },
   };
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(`Gemini API error: ${data?.error?.message || res.statusText}`);
+  const maxAttempts = 4;
+  let lastError;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) throw new Error("Gemini مرجعش نتيجة قابلة للقراءة");
+      return JSON.parse(text);
+    }
+
+    const message = data?.error?.message || res.statusText;
+    const isOverloaded = res.status === 503 || /overload|high demand/i.test(message);
+    lastError = new Error(`Gemini API error: ${message}`);
+    if (!isOverloaded || attempt === maxAttempts) throw lastError;
+
+    const waitSeconds = attempt * 3;
+    log(`سيرفرات Gemini مزحومة، بحاول تاني بعد ${waitSeconds} ثانية... (محاولة ${attempt} من ${maxAttempts})`);
+    await new Promise((r) => setTimeout(r, waitSeconds * 1000));
   }
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error("Gemini مرجعش نتيجة قابلة للقراءة");
-  return JSON.parse(text);
+  throw lastError;
 }
 
 // ---------- main flow ----------
@@ -382,8 +396,10 @@ async function runAnalysis() {
     log("خلصنا! 🎉", "ok");
   } catch (e) {
     log(`خطأ: ${e.message}`, "err");
-    if (/Gemini API error/i.test(e.message)) {
-      log('لو الخطأ بيقول إن الموديل مش متاح، افتح "إعداد متقدم" وغيّر اسم الموديل (مثلاً جرب الاسم اللي اقترحته الرسالة نفسها)، وبعدين دوس الزرار تاني.', "err");
+    if (/no longer available|not found|not supported/i.test(e.message)) {
+      log('الموديل ده مش متاح. افتح "إعداد متقدم" وغيّر اسم الموديل (مثلاً جرب الاسم اللي اقترحته الرسالة نفسها)، وبعدين دوس الزرار تاني.', "err");
+    } else if (/overload|high demand/i.test(e.message)) {
+      log("سيرفرات Gemini لسه مزحومة بعد كذا محاولة. استنى دقيقة أو اتنين وجرب تاني.", "err");
     }
   } finally {
     els.analyzeBtn.disabled = false;
